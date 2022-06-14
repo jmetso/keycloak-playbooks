@@ -1,1 +1,3 @@
+vault_keycloak_admin_user: admin
+vault_keycloak_admin_password: password
 vault_user_password: examplepwd1!
