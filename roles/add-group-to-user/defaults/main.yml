@@ -1,0 +1,7 @@
+# roles/add-group-to-user/defaults/main.yml
+
+#base_url
+#access_token
+#realm
+#group_name
+#user_uuid
