@@ -1,0 +1,5 @@
+# roles/login/defaults/main.yml
+# keycloak_base_url
+login_realm: master
+#keycloak_admin_user
+#keycloak_admin_password

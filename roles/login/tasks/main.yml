@@ -1,0 +1,27 @@
+# roles/login/tasks/main.yml
+
+- name: Login to Keycloak REST API
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/realms/{{ realm }}/protocol/openid-connect/token"
+    method: POST
+    headers:
+      Accept: "*/*"
+    body_format: form-urlencoded
+    body:
+      client_id: admin-cli
+      username: "{{ admin_user }}"
+      password: "{{ admin_password }}"
+      grant_type: password
+    validate_certs: no
+  register: login_response
+
+- name: Set access token as fact keycloak_access_token
+  ansible.builtin.set_fact:
+    keycloak_access_token: "{{ login_response.json | json_query( access_token_query ) }}"
+  vars:
+    access_token_query: "access_token"
+
+- name: Debug access token
+  ansible.builtin.debug:
+    var: keycloak_access_token
+    verbosity: 2
