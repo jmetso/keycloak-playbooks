@@ -1,0 +1,93 @@
+# roles/add-user/tasks/main.yml
+
+- name: Check if user exists
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/users?username={{ username }}"
+    method: GET
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: form-urlencoded
+    validate_certs: no
+  register: existing_user
+  ignore_errors: yes
+
+- name: Debug existing user
+  debug:
+    var: existing_user.json
+    verbosity: 1
+
+- name: Set existing user id as fact
+  ansible.builtin.set_fact:
+    existing_user_id: "{{ existing_user.json | json_query( existing_user_query ) }}"
+  vars:
+    existing_user_query: "[? username=='{{ username }}'].{ id: id }"
+  when: existing_user.json | length > 0
+
+- name: Set temporary password on
+  ansible.builtin.set_fact:
+    temporary_password: true
+  when: lookup('vars', 'vault_' + item.username + '_password', default = '') == ''
+
+- name: Set temporary password off
+  ansible.builtin.set_fact:
+    temporary_password: false
+  when: lookup('vars', 'vault_' + item.username + '_password', default = '') != ''
+
+- name: Create user
+  ansible.builtin.uri:
+    url: "{{ base_url}}/auth/admin/realms/{{ realm }}/users"
+    method: POST
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: json
+    validate_certs: no
+    status_code: 201
+    body:
+      "{ \"username\": \"{{ username }}\",
+         \"firstName\": \"{{ first_name }}\",
+         \"lastName\": \"{{ last_name }}\",
+         \"email\": \"{{ email }}\",
+         \"emailVerified\": true,
+         \"enabled\": true,
+         \"credentials\": [{
+           \"type\": \"password\",
+           \"value\": \"{{ lookup('vars', 'vault_' + item.username + '_password', default='tmp_pwd1') }}\",
+           \"temporary\": {{ temporary_password | lower }}
+         }],
+      }"
+  when: existing_user.json | length == 0
+
+- name: Get new user id
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/users?username={{ username }}"
+    method: GET
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: form-urlencoded
+    validate_certs: no
+  register: existing_user
+  ignore_errors: yes
+
+- name: Add client role to user
+  ansible.builtin.include_role:
+    name: add-client-role-to-user
+  vars:
+    user_uuid: "{{ existing_user.json[0].id }}"
+    client_id: "{{ role.client }}"
+    client_role_name: "{{ role.role }}"
+  loop: "{{ client_roles | list }}" 
+  loop_control:
+    loop_var: role 
+
+- name: Add group to user
+  ansible.builtin.include_role:
+    name: add-group-to-user
+  vars:
+    user_uuid: "{{ existing_user.json[0].id }}"
+    group_name: "{{ user_group }}"
+  loop: "{{ user_groups | list }}"
+  loop_control:
+    loop_var: user_group 
