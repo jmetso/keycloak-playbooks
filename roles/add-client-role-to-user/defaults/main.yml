@@ -1,0 +1,7 @@
+# roles/add-client-role-to-user/defaults/main.yml
+
+#base_url
+#realm
+#access_token
+#client_id
+#client_role_name
