@@ -1,6 +1,6 @@
 # Ansible playbooks for Keycloak
 
-This repo contains ansible playbooks for [Keycloak](https://www.keycloak.org)
+This repo contains [Ansible](https://www.ansible.com) [playbooks](https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html) for [Keycloak](https://www.keycloak.org)
 
 ## add-user.yaml
 
