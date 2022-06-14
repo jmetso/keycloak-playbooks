@@ -5,6 +5,7 @@ This repo contains ansible playbooks for [Keycloak](https://www.keycloak.org)
 ## add-user.yaml
 
 Adds user(s) to a Keycloak Realm. Supports adding client roles and groups.
+
 User definition:
 ```
 - username: user
