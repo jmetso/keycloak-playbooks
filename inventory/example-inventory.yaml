@@ -1,0 +1,19 @@
+all:
+  hosts:
+  keycloak:
+    localhost:
+      ansile_connection: local
+  vars:
+    keycloak_target_realm: realm
+    keycloak_base_url: https://<keycloak-host>:<port>
+    users:
+      - username: user
+        firstname: user
+        lastname: name
+        email: example@example.org
+        enabled: true
+        clientroles:
+          - client: client-name
+            role: role-name
+        groups:
+          - group
