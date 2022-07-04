@@ -1,0 +1,55 @@
+# roles/add-group/tasks/main.yml
+
+- name: Echo group name
+  ansible.builtin.debug:
+    msg: "Creating group '{{ group_name }}'"
+
+- name: Get existing groups
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/groups"
+    method: GET
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: form-urlencoded
+    validate_certs: no
+  register: existing_groups
+
+- name: Debug existing groups
+  ansible.builtin.debug:
+    var: existing_groups.json
+    verbosity: 1
+
+- name: Set existing group id as fact
+  ansible.builtin.set_fact:
+    existing_group_id: "{{ existing_groups.json | json_query( existing_group_query ) }}"
+  vars:
+    existing_group_query: "[? name=='{{ group_name }}'].{ id: id }"
+
+- name: Create group
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/groups"
+    method: POST
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: json
+    validate_certs: no
+    status_code: 201
+    body: 
+      "{
+        \"access\": {},
+        \"attributes\": {},
+        \"clientRoles\": {}, 
+        \"name\": \"{{ group_name }}\",
+        \"path\": \"/{{ group_name }}\",
+        \"realmRoles\": [],
+        \"subGroups\": []
+      }"
+  register: create_group_response
+  when: existing_group_id | length == 0
+
+- name: Echo create group response
+  ansible.builtin.debug:
+    var: create_group_response
+    verbosity: 1
