@@ -17,3 +17,5 @@ all:
             role: role-name
         groups:
           - group
+    keycloak_groups:
+      - example-group
