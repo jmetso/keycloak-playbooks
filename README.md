@@ -19,3 +19,22 @@ User definition:
   groups:
   - group
 ```
+
+## add-group.yaml
+
+Adds group(s) to a Keycloak Realm. 
+
+Specifying groups in inventory:
+```
+all:
+  hosts:
+  children:
+    keycloak:
+      hosts:
+        localhost:
+          ansible_connection: local
+      vars:
+        keycloak_groups:
+        - test_group
+        - new_group
+```
