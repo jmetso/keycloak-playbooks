@@ -1,0 +1,33 @@
+---
+
+- name: Add groups to Keycloak
+  hosts: keycloak
+  gather_facts: no
+  vars:
+#  - keycloak_base_url: "https://<keycloak-host>:<port>" # from inventory file 
+  - keycloak_admin_user: "{{ vault_keycloak_admin_user }}"
+  - keycloak_admin_password: "{{ vault_keycloak_admin_password }}"
+  - keycloak_admin_realm: master
+#  - keycloak_target_realm: "realm" # from inventory file
+#  - keycloak_groups: # from inventory file
+
+  tasks:
+  - name: Login to Keycloak
+    ansible.builtin.include_role:
+      name: login
+    vars:
+      base_url: "{{ keycloak_base_url }}"
+      realm: "{{ keycloak_admin_realm }}"
+      admin_user: "{{ keycloak_admin_user }}"
+      admin_password: "{{ keycloak_admin_password }}"
+
+  - name: Add group to Keycloak
+    ansible.builtin.include_role:
+      name: add-group
+    vars:
+      base_url: "{{ keycloak_base_url }}"
+      realm: "{{ keycloak_target_realm }}"
+      access_token: "{{ keycloak_access_token }}"
+      group_name: "{{ item }}"
+    loop: "{{ keycloak_groups | list }}"
+  
