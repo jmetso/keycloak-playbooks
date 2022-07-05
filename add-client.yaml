@@ -1,0 +1,63 @@
+---
+
+- name: Add client to Keycloak realm
+  hosts: keycloak
+  collections:
+  - middleware_automation.keycloak
+  gather_facts: no
+  vars:
+#  - keycloak_base_url: "https://<keycloak-host>:<port>" # from inventory file 
+  - keycloak_admin_user: "{{ vault_keycloak_admin_user }}"
+  - keycloak_admin_password: "{{ vault_keycloak_admin_password }}"
+  - keycloak_admin_realm: master
+#  - keycloak_target_realm: "realm" # from inventory file
+#  - keycloak_groups: # from inventory file
+
+  tasks:
+  - name: Login to Keycloak
+    ansible.builtin.include_role:
+      name: login
+    vars:
+      base_url: "{{ keycloak_base_url }}"
+      realm: "{{ keycloak_admin_realm }}"
+      admin_user: "{{ keycloak_admin_user }}"
+      admin_password: "{{ keycloak_admin_password }}"
+
+  - name: Check that realm exists
+    ansible.builtin.include_role:
+      name: check-realm-exists
+    vars:
+      base_url: "{{ keycloak_base_url }}"
+      realm: "{{ keycloak_target_realm }}"
+      access_token: "{{ keycloak_access_token }}"
+
+  - name: Create or update a Keycloak client
+    community.general.keycloak_client:
+      auth_client_id: "admin-cli"
+      auth_keycloak_url: "{{ keycloak_base_url }}/auth"
+      auth_realm: "{{ keycloak_admin_realm }}"
+      auth_username: "{{ keycloak_admin_user }}"
+      auth_password: "{{ keycloak_admin_password }}"
+      realm: "{{ keycloak_target_realm }}"
+      default_roles: "{{ item.roles | default(omit) }}"
+      client_id: "{{ item.client_id | default(omit) }}"
+      id: "{{ item.id | default(omit) }}"
+      name: "{{ item.name | default(omit) }}"
+      description: "{{ item.description | default(omit) }}"
+      root_url: "{{ item.root_url | default('') }}"
+      admin_url: "{{ item.admin_url | default('') }}"
+      base_url: "{{ item.base_url | default('') }}"
+      enabled: "{{ item.enabled | default(True) }}"
+      redirect_uris: "{{ item.redirect_uris | default(omit) }}"
+      web_origins: "{{ item.web_origins | default('+') }}"
+      bearer_only: "{{ item.bearer_only | default(omit) }}"
+      standard_flow_enabled: "{{ item.standard_flow_enabled | default(omit) }}"
+      implicit_flow_enabled: "{{ item.implicit_flow_enabled | default(omit) }}"
+      direct_access_grants_enabled: "{{ item.direct_access_grants_enabled | default(omit) }}"
+      service_accounts_enabled: "{{ item.service_accounts_enabled | default(omit) }}"
+      public_client: "{{ item.public_client | default(False) }}"
+      protocol: "{{ item.protocol | default(omit) }}"
+      state: "{{ item.state | default('present')}}"
+    no_log: True
+    loop: "{{ keycloak_clients | flatten }}"
+    when: (item.name is defined and item.client_id is defined) or (item.name is defined and item.id is defined)
