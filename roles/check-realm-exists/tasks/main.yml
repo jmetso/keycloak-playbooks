@@ -1,0 +1,18 @@
+# roles/check-realm-exists/tasks/main.yml 
+
+- name: "Determine if realm exists"
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}"
+    method: GET
+    status_code:
+      - 200
+      - 404
+    headers:
+      Accept: "application/json"
+      Authorization: "Bearer {{ access_token }}"
+  register: keycloak_realm_exists
+
+- name: Fail if realm does not exist
+  ansible.builtin.fail:
+    msg: "Realm '{{ realm }}' does not exist!"
+  when: keycloak_realm_exists.status == 404 

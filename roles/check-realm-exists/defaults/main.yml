@@ -1,0 +1,5 @@
+# roles/check-realm-exists/defaults/main.yml
+
+# base_url
+# realm
+# access_token
