@@ -1,6 +1,6 @@
 ---
 
-- name: Add groups to Keycloak
+- name: Add groups to Keycloak realm
   hosts: keycloak
   gather_facts: no
   vars:
