@@ -38,3 +38,27 @@ all:
         - test_group
         - new_group
 ```
+
+## add-client.yaml
+
+Adds Keycloak clients to Keycloak Realm.
+
+Realm spec:
+```
+keycloak_clients:
+- state: present # default: present
+  client_id: client
+  name: <client-name>
+  description: Client description
+  enabled: True # default: True
+  protocol: openid-connect # default: openid-connect
+  client_authenticator_type: client-secret # default: client-secret
+  standard_flow_enabled: True # default: True
+  implicit_flow_enabled: False # default: False
+  direct_access_grants_enabled: False # default: False
+  root_url: "${authBaseUrl}"
+  redirect_uris:
+  - https://client.example.com/*
+  base_url: /realms/my-realm.com/account/
+  full_scope_allowed: True # default: False
+```
