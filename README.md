@@ -20,9 +20,9 @@ User definition:
   - group
 ```
 
-## add-group.yaml
+## groups.yaml
 
-Adds group(s) to a Keycloak Realm. 
+Adds and/or deletes group(s) to/from a Keycloak Realm. 
 
 Specifying groups in inventory:
 ```
@@ -35,8 +35,10 @@ all:
           ansible_connection: local
       vars:
         keycloak_groups:
-        - test_group
-        - new_group
+        - name: test_group
+          state: present
+        - name: new_group
+          state: absent
 ```
 
 ## add-client.yaml
