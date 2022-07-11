@@ -18,7 +18,8 @@ all:
         groups:
           - group
     keycloak_groups:
-      - example-group
+      - name: example-group
+        state: present
     keycloak_clients:
     - state: present # default: present
       client_id: odoo.example.com
