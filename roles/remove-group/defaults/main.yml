@@ -1,0 +1,7 @@
+# roles/remove-group/defaults/main.yml
+
+# base_url
+# group_name
+# realm
+# access_token
+# group_state

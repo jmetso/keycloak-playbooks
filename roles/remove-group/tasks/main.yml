@@ -1,0 +1,61 @@
+# roles/remove-group/tasks/main.yml
+
+- name: Echo group name
+  ansible.builtin.debug:
+    msg: "Removing group '{{ group_name }}'"
+
+- name: Get existing groups
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/groups"
+    method: GET
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: form-urlencoded
+    validate_certs: no
+  register: existing_groups
+
+- name: Debug existing groups
+  ansible.builtin.debug:
+    var: existing_groups.json
+    verbosity: 1
+
+- name: Set existing group id as fact
+  ansible.builtin.set_fact:
+    existing_group_id: "{{ existing_groups.json | json_query( existing_group_query ) }}"
+  vars:
+    existing_group_query: "[? name=='{{ group_name }}'].{ id: id }"
+
+- name: Debug existing groups ids
+  ansible.builtin.debug:
+    var: existing_group_id
+    verbosity: 1
+
+
+- name: Remove group
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/groups/{{ existing_group_id[0].id }}"
+    method: DELETE
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: json
+    validate_certs: no
+    status_code: 204
+    body: 
+      "{
+        \"access\": {},
+        \"attributes\": {},
+        \"clientRoles\": {}, 
+        \"name\": \"{{ group_name }}\",
+        \"path\": \"/{{ group_name }}\",
+        \"realmRoles\": [],
+        \"subGroups\": []
+      }"
+  register: remove_group_response
+  when: existing_group_id | length == 1 and group_state == 'absent'
+
+- name: Echo create group response
+  ansible.builtin.debug:
+    var: remove_group_response
+    verbosity: 1
