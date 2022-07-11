@@ -28,6 +28,19 @@
       base_url: "{{ keycloak_base_url }}"
       realm: "{{ keycloak_target_realm }}"
       access_token: "{{ keycloak_access_token }}"
-      group_name: "{{ item }}"
+      group_name: "{{ item.name }}"
+      group_state: "{{ item.state }}"
     loop: "{{ keycloak_groups | list }}"
+    when: item.state == 'present'
   
+  - name: Remove group from Keycloak
+    ansible.builtin.include_role:
+      name: remove-group
+    vars:
+      base_url: "{{ keycloak_base_url }}"
+      realm: "{{ keycloak_target_realm }}"
+      access_token: "{{ keycloak_access_token }}"
+      group_name: "{{ item.name }}"
+      group_state: "{{ item.state | default('present') }}"
+    loop: "{{ keycloak_groups | list }}"
+    when: item.state == 'absent'
