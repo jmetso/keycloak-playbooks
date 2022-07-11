@@ -53,7 +53,7 @@
         \"subGroups\": []
       }"
   register: remove_group_response
-  when: existing_group_id | length == 1 and group_state == 'absent'
+  when: existing_group_id | length == 1
 
 - name: Echo create group response
   ansible.builtin.debug:
