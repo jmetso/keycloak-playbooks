@@ -31,7 +31,6 @@
     var: existing_group_id
     verbosity: 1
 
-
 - name: Remove group
   ansible.builtin.uri:
     url: "{{ base_url }}/auth/admin/realms/{{ realm }}/groups/{{ existing_group_id[0].id }}"
