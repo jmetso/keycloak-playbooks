@@ -2,13 +2,16 @@
 
 This repo contains [Ansible](https://www.ansible.com) [playbooks](https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html) for [Keycloak](https://www.keycloak.org)
 
-## add-user.yaml
+## users.yaml
 
-Adds user(s) to a Keycloak Realm. Supports adding client roles and groups.
+Manage users in a Keycloak Realm. Supports client roles and groups.
+
+User passwords can be defined through vault with vault_<username>_password. If user password is not defined in vault, a temporary password is set.
 
 User definition:
 ```
-- username: user
+- state: present
+  username: user
   firstname: user
   lastname: name
   email: example@example.org
