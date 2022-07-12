@@ -1,0 +1,28 @@
+- name: Check if user exists
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/users?username={{ username }}"
+    method: GET
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: form-urlencoded
+    validate_certs: no
+    status_code: 200
+  register: keycloak_user
+
+- name: Debug existing user
+  debug:
+    var: keycloak_user
+    verbosity: 1
+  
+- name: Add user to Keycloak
+  ansible.builtin.include_role:
+    name: add-user
+  when: state == 'present' and keycloak_user.json | length == 0
+
+- name: Update user in Keycloak
+  ansible.builtin.include_role:
+    name: update-user
+  vars:
+    user_uuid: "{{ keycloak_user.json[0].id }}"
+  when: state == 'present' and keycloak_user.json | length == 1
