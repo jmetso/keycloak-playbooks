@@ -6,7 +6,7 @@ This repo contains [Ansible](https://www.ansible.com) [playbooks](https://docs.a
 
 Manage users in a Keycloak Realm. Supports client roles and groups.
 
-User passwords can be defined through vault with vault_<username>_password. If user password is not defined in vault, a temporary password is set.
+User passwords can be defined through vault with vault_*username*_password. If user password is not defined in vault, a temporary password is set and the user needs to change their password at first login.
 
 User definition:
 ```
