@@ -34,7 +34,7 @@
 
 - name: Fail if group doesn't exist
   ansible.builtin.fail:
-    msg: "Group '{{ group_name }}' does not exist!"
+    msg: "Trying to add group '{{ group_name }}' to user but it does not exist!"
   when: keycloak_group_id | length == 0
 
 - name: Add user to group
