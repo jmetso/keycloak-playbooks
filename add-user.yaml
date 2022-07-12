@@ -21,9 +21,9 @@
       admin_user: "{{ keycloak_admin_user }}"
       admin_password: "{{ keycloak_admin_password }}"
 
-  - name: Add user to Keycloak
+  - name: Update user
     ansible.builtin.include_role:
-      name: add-user
+      name: manage-user
     vars:
       base_url: "{{ keycloak_base_url }}"
       realm: "{{ keycloak_target_realm }}"
@@ -35,4 +35,5 @@
       enabled: "{{ item.enabled }}"
       client_roles: "{{ item.clientroles | flatten(levels=1) }}"
       user_groups: "{{ item.groups | list }}"
+      state: "{{ item.state }}"
     loop: "{{ keycloak_users | flatten(levels=1) }}"
