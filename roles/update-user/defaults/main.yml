@@ -1,0 +1,11 @@
+# roles/update-user/defaults/main.yml
+
+#base_url
+#realm
+#username
+#access_token
+#first_name
+#last_name
+#email
+#enabled
+#user_uuid

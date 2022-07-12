@@ -1,0 +1,57 @@
+# roles/update-user/tasks/main.yml
+
+- name: Update user details
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/users/{{ user_uuid }}"
+    method: PUT
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: json
+    validate_certs: no
+    status_code: 204
+    body:
+      "{
+        \"firstName\": \"{{ first_name }}\",
+        \"lastName\": \"{{ last_name }}\",
+        \"email\": \"{{ email }}\",
+        \"emailVerified\": true,
+        \"enabled\": {{ enabled }}
+      }"  
+
+- name: Add group to user
+  ansible.builtin.include_role:
+    name: add-group-to-user
+  vars:
+    group_name: "{{ user_group }}"
+  loop: "{{ user_groups | list }}"
+  loop_control:
+    loop_var: user_group 
+
+- name: Get user groups
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/users/{{ user_uuid }}/groups"
+    method: GET
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: form-urlencoded
+    validate_certs: no
+    status_code: 200
+  register: existing_user_groups
+
+- name: Debug existing user groups
+  ansible.builtin.debug:
+    var: existing_user_groups.json
+    verbosity: 1
+
+- name: Remove user from group
+  ansible.builtin.include_role:
+    name: remove-group-from-user
+  vars:
+    group_name: "{{ existing_user_group.name }}"
+  loop: "{{ existing_user_groups.json }}"
+  when: existing_user_group.name not in user_groups
+  loop_control:
+    loop_var: existing_user_group
+
