@@ -1,0 +1,44 @@
+# roles/remove-group-from-user/tasks/main.yml
+
+- name: Echo group name
+  ansible.builtin.debug:
+    msg: "Removing group '{{ group_name }}'"
+
+- name: Get groups
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/groups"
+    method: GET
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: form-urlencoded
+    validate_certs: no
+  register: keycloak_groups
+
+- name: Debug keycloak groups
+  ansible.builtin.debug:
+    var: keycloak_groups.json
+    verbosity: 1
+
+- name: Set group id as fact
+  ansible.builtin.set_fact:
+    keycloak_group_id: "{{ keycloak_groups.json | json_query( group_id_query ) }}"
+  vars:
+    group_id_query: "[? name=='{{ group_name }}'].{ id: id }"
+  when: keycloak_groups.json | length > 0
+
+- name: Debug group id
+  ansible.builtin.debug:
+    var: keycloak_group_id
+    verbosity: 1
+
+- name: Add user to group
+  ansible.builtin.uri:
+    url: "{{ base_url }}/auth/admin/realms/{{ realm }}/users/{{ user_uuid }}/groups/{{ keycloak_group_id[0].id }}"
+    method: DELETE
+    headers:
+      Accept: "*/*"
+      Authorization: "Bearer {{ access_token }}"
+    body_format: form-urlencoded
+    validate_certs: no
+    status_code: 204
